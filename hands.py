@@ -7,7 +7,7 @@ import threading
 
 class HandDetect:
     def __init__(self, stream, page):
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(1)
         self.streaming = True
         self.page = page
         self.stream = stream
@@ -103,13 +103,13 @@ class HandDetect:
 
     def play_video(self):
         if not self.cap.isOpened():
-            self.cap = cv2.VideoCapture(0)
+            self.cap = cv2.VideoCapture(1)
         self.processing = False
         threading.Thread(target=self.video, daemon=True).start()
 
     def play_detect(self):
         if not self.cap.isOpened():
-            self.cap = cv2.VideoCapture(0)
+            self.cap = cv2.VideoCapture(1)
 
         self.processing = True
         self.streaming = False
