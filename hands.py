@@ -1,30 +1,10 @@
-# -------------------librerias---------------- 
-
 import cv2
 import mediapipe as mp
 import numpy as np
 import base64
 import threading
-import pyautogui
 
-
-#=========== función para trasladar coordenadas==================
-def cam_to_screen(x: int, y: int, image):
-    '''
-    Función para trasladar las coordenadas dadas en por el video 
-    a las dimensiones reales de la pantalla
-    '''
-    width_s, heigth_s = pyautogui.size()
-    heigth, width, _ = image.shape
-
-    y_n = (y * heigth_s) / heigth
-    x_n = (x * width_s) / width
-
-    return (x_n, y_n)
-
-#==============================================
-#==============================================
-class HandDetect():
+class HandDetect:
     def __init__(self, stream, page):
         self.cap = cv2.VideoCapture(0)
         self.streaming = True
@@ -60,33 +40,16 @@ class HandDetect():
 
                     if results.multi_hand_landmarks is not None:
                         for marks in results.multi_hand_landmarks:
-                            wrist_x = int(marks.landmark[0].x * width)
-                            wrist_y = int(marks.landmark[0].y * heigth)
-                            thumbtip_x = int(marks.landmark[4].x * width)
-                            thumbtip_y = int(marks.landmark[4].y * heigth)
-                            index_fin_tip_x = int(marks.landmark[8].x * width)
-                            index_fin_tip_y = int(marks.landmark[8].y * heigth)
-                            middle_fin_tip_x = int(marks.landmark[12].x * width)
-                            middle_fin_tip_y = int(marks.landmark[12].y * heigth)
+                            # Obtener la posición del dedo índice
+                            index_finger_tip_x = int(marks.landmark[8].x * width)
+                            index_finger_tip_y = int(marks.landmark[8].y * heigth)
 
-                            cv2.circle(image, (wrist_x, wrist_y), 3, (255, 0, 0), 3)
-                            cv2.circle(image, (thumbtip_x, thumbtip_y), 3, (255, 0, 0), 3)
-                            cv2.circle(image, (index_fin_tip_x, index_fin_tip_y), 3, (255, 0, 0), 3)
-                            cv2.circle(image, (middle_fin_tip_x, middle_fin_tip_y), 3, (255, 0, 0), 3)
-
-                            x, y = cam_to_screen(index_fin_tip_x, index_fin_tip_y, image)
-                            pyautogui.moveTo(x, y)
-
-                            rest_index_x = abs(index_fin_tip_x - thumbtip_x)
-                            rest_index_y = abs(index_fin_tip_y - thumbtip_y)
-                            rest_mid_x = abs(middle_fin_tip_x - thumbtip_x)
-                            rest_mid_y = abs(middle_fin_tip_y - thumbtip_y)
-
-                            if rest_index_x < 10 and rest_index_y < 15:
-                                pyautogui.leftClick()
-
-                            if rest_mid_x < 10 and rest_mid_y < 10:
-                                pyautogui.rightClick()
+                            # Aquí se enviarían las coordenadas al cliente
+                            self.page.send({
+                                "type": "update_cursor",
+                                "x": index_finger_tip_x,
+                                "y": index_finger_tip_y,
+                            })
 
                     _, buffer = cv2.imencode('.jpg', image)
                     self.stream.src_base64 = base64.b64encode(buffer).decode('utf-8')

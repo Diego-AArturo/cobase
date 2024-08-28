@@ -1,4 +1,5 @@
 /.venv
 /objetos3d.py
 /other.py
+/hands_local.py
 /__pycache__
